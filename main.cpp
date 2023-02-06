@@ -113,7 +113,6 @@ using namespace std;
 #define VK_NONAME          0xFC
 #define VK_PA1             0xFD
 #define VK_OEM_CLEAR       0xFE
-
 // VK_0 thru VK_9 are the same as ASCII '0' thru '9' (0x30 - 0x39)
 // VK_A thru VK_Z are the same as ASCII 'A' thru 'Z' (0x41 - 0x5A)
 class KEYBOARD
@@ -142,6 +141,21 @@ void KEYBOARD::KeyUp(BYTE bVk)
     ::keybd_event(bVk,0,KEYEVENTF_KEYUP,0);
 }
 
+void inputString(string str, int x, int y, HWND hwnd) {
+    // 焦点
+    PostMessage(hwnd, WM_LBUTTONDOWN | WM_LBUTTONUP, 0,MAKELPARAM(x,y));
+    // 输入内容
+    for(int i = 0; i < str.size(); i++) {
+        if((int)str[i] > 65) {
+            cout<< (int)str[i] - 32<< endl;
+            PostMessage(hwnd, WM_KEYDOWN | WM_KEYUP, (int)str[i] - 32, MAKELPARAM(x,y));
+        } else {
+            cout<< (int)str[i]<< endl;
+            PostMessage(hwnd, WM_KEYDOWN | WM_KEYUP, (int)str[i], MAKELPARAM(x,y));
+        }
+    }
+}
+
 // 遍历窗口
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
@@ -158,28 +172,28 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 			// 过滤掉大小不为 650*380 的窗口
 			RECT rect;
 			GetWindowRect(hwnd, &rect);
-			if((rect.right - rect.left) == 658 && (rect.bottom - rect.top) == 757){
+			if((rect.right - rect.left) == 610 && (rect.bottom - rect.top) == 507){
+                inputString("0123456789abcedfghijklmopqrstuvwxyz", 117, 476, hwnd);
 				// 过滤掉没有指定文本的窗口
-				for(int i = 0; i < 5; i++){
-					// 指定位置右键
-					PostMessage(hwnd, WM_RBUTTONDOWN, 0,MAKELPARAM(255,674));
-					PostMessage(hwnd, WM_RBUTTONUP,0,MAKELPARAM(255,674));
-					Sleep(10);
-					// 按下 'A'
-					PostMessage(hwnd, WM_KEYDOWN, 0x41,0);
-					PostMessage(hwnd, WM_KEYUP, 0x41,0);
-					Sleep(10);
-					// 指定位置右键
-					PostMessage(hwnd, WM_RBUTTONDOWN, 0,MAKELPARAM(255,674));
-					PostMessage(hwnd, WM_RBUTTONUP, 0,MAKELPARAM(255,674));
-					Sleep(10);
-					// 按下 'C'
-					PostMessage(hwnd, WM_KEYDOWN, 0x43,0);
-					PostMessage(hwnd, WM_KEYUP, 0x43,0);
-				}
 				// 指定位置左键（取消选中）
-				PostMessage(hwnd, WM_LBUTTONDOWN, 0,MAKELPARAM(255,674));
-				PostMessage(hwnd, WM_LBUTTONUP, 0,MAKELPARAM(255,674));
+				// PostMessage(hwnd, WM_LBUTTONDOWN | WM_LBUTTONUP, 0,MAKELPARAM(117,476));
+				// PostMessage(hwnd, WM_LBUTTONUP, 0,MAKELPARAM(117,476));
+                // for(int i = 0; i < 5; i++){
+				// 	// 指定位置右键
+				// 	// PostMessage(hwnd, WM_RBUTTONDOWN, 0,MAKELPARAM(117,476));
+				// 	// PostMessage(hwnd, WM_RBUTTONUP,0,MAKELPARAM(117,476));
+				// 	// Sleep(10);
+				// 	// 按下 'A'
+				// 	PostMessage(hwnd, WM_KEYDOWN | WM_KEYUP, 65,0);
+				// 	Sleep(10);
+				// 	// // 指定位置右键
+				// 	// PostMessage(hwnd, WM_RBUTTONDOWN, 0,MAKELPARAM(117,476));
+				// 	// PostMessage(hwnd, WM_RBUTTONUP, 0,MAKELPARAM(117,476));
+				// 	// Sleep(10);
+				// 	// 按下 'C'
+				// 	PostMessage(hwnd, WM_KEYDOWN | WM_KEYUP, 0x43,0);
+				// 	// PostMessage(hwnd, WM_KEYUP, 0x43,0);
+				// }
 			}
 		}	
 	}
@@ -199,9 +213,5 @@ int main() {
             EnumWindows(EnumWindowsProc, 0);
         }
     }
-    // PostMessage((HWND)"0000000000150A9A", WM_LBUTTONDOWN, 0,MAKELPARAM(243,697));
-    // PostMessage((HWND)"0000000000150A9A", WM_LBUTTONUP, 0,MAKELPARAM(243,697));
-    // PostMessage((HWND)"0000000000150A9A", WM_KEYDOWN, 0x31, MAKELPARAM(243,697));
-    // HWND hWnd, UINT command, UINT ID, UINT eventType
     return 0;
 }
